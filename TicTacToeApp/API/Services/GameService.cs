@@ -27,8 +27,12 @@ namespace API.Services
         public async Task<bool> UndoLastMoveAsync(int gameId)
         {
             var lastMove = await _repo.GetLastMoveAsync(gameId);
+            var game = await _repo.GetGameAsync(gameId);
             if (lastMove == null) return false;
+            if (game == null) return false;
+            game.CurrentTurn = lastMove.Player;
             await _repo.RemoveMoveAsync(lastMove);
+            await _repo.UpdateCurrentTurnGameAssync(game);
             return true;
         }
 

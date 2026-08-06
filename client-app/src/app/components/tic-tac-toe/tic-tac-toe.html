@@ -3,7 +3,7 @@
 
   <!-- Start Button -->
   <div class="start-section" *ngIf="!gameId">
-    <button (click)="startGame()">Start Game (X vs O)</button>
+    <button (click)="startGame()">Start Game (Player1(X) vs Player2(O))</button>
   </div>
 
   <!-- Game Board -->
@@ -43,5 +43,9 @@
       </tr>
     </tbody>
   </table>
+</div>
+<div *ngIf="isLoading" class="loading">
+  <div class="spinner"></div>
+  <p>Loading...</p>
 </div>
 </div>

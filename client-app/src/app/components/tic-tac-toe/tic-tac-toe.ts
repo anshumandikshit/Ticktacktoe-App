@@ -14,6 +14,7 @@ import { ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.Default 
 })
 export class TicTacToeComponent {
+  isLoading: boolean = false;
   board: string[] = Array(9).fill('');
   currentPlayer: 'X' | 'O' = 'X';
   winner: string | null = null;
@@ -25,6 +26,7 @@ export class TicTacToeComponent {
   constructor(private gameService: GameService, private cd: ChangeDetectorRef) { }
 
   public startGame() {
+    this.isLoading = true;
     const newGame: Game = {
       player1: 'X',
       player2: 'O',
@@ -34,6 +36,7 @@ export class TicTacToeComponent {
     };
 
     this.gameService.createGame(newGame).subscribe(game => {
+      this.isLoading=false;
       this.gameId = game.id;
       this.board = [...Array(9).fill('')];
       this.currentPlayer = 'X';
@@ -78,6 +81,7 @@ export class TicTacToeComponent {
         };
         this.moveHistory = game.moves || [];
         this.board = newBoard;
+        this.currentPlayer=game.currentTurn;
         this.checkWinner(); //  run winner detection after reload
         this.cd.detectChanges(); 
       });
@@ -98,9 +102,6 @@ export class TicTacToeComponent {
   }
 
   public undoMove() {
-    if (this.winner) {
-    return; //  do nothing if winner exists
-    }
     if (this.gameId) {
       this.gameService.undoMove(this.gameId).subscribe(() => {
         this.reloadGame();
@@ -110,14 +111,18 @@ export class TicTacToeComponent {
   }
 
   public loadScoreboard() {
+    this.isLoading=true
     this.gameService.getScoreboard().subscribe(scores => {
+      this.isLoading=false;
       this.scoreboard = scores;
       this.cd.detectChanges(); 
     });
   }
 
   public resetScoreboard() {
+    this.isLoading=true;
     this.gameService.resetScoreboard().subscribe(() => {
+      this.isLoading=false;
       this.scoreboard = [];
       this.cd.detectChanges(); 
     });

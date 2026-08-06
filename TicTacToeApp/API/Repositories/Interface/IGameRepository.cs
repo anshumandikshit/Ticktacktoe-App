@@ -9,6 +9,8 @@ namespace API.Repositories.Interface
         Task<Move> AddMoveAsync(Move move);
         Task<Move?> GetLastMoveAsync(int gameId);
         Task RemoveMoveAsync(Move move);
+
+        Task<Game> UpdateCurrentTurnGameAssync(Game game);
         Task SaveChangesAsync();
     }
 }

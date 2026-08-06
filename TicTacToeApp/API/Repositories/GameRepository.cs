@@ -27,6 +27,14 @@ namespace API.Repositories
             return await _context.Games.Include(g => g.Moves)
                                        .FirstOrDefaultAsync(g => g.Id == id);
         }
+        public async Task<Game> UpdateCurrentTurnGameAssync(Game game)
+        {
+            var gameContext = await _context.Games.Where(g => g.Id == game.Id).FirstOrDefaultAsync();
+            gameContext.CurrentTurn = game.CurrentTurn;
+
+            await _context.SaveChangesAsync();
+            return gameContext;
+        }
 
         public async Task<Move> AddMoveAsync(Move move)
         {
