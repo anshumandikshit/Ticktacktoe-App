@@ -1,4 +1,6 @@
-﻿namespace API.Models
+﻿using System.Text.Json.Serialization;
+
+namespace API.Models
 {
     public class Move
     {
@@ -8,6 +10,7 @@
         public string Action { get; set; } // e.g. "X at (0,1)"
         public DateTime Timestamp { get; set; }
 
-        public Game Game { get; set; }
+        [JsonIgnore]
+        public Game? Game { get; set; }
     }
 }

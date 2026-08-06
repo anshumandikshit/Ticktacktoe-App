@@ -1,0 +1,35 @@
+<div class="game-container">
+  <h2>Tic Tac Toe</h2>
+
+  <!-- Start Button -->
+  <div class="start-section" *ngIf="!gameId">
+    <button (click)="startGame()">Start Game (X vs O)</button>
+  </div>
+
+  <!-- Game Board -->
+  <div *ngIf="gameId">
+    <div class="board">
+      <div *ngFor="let cell of board; let i = index"
+           class="cell"
+           (click)="makeMove(i)">
+        {{ cell }}
+      </div>
+    </div>
+
+    <div class="status">
+      <p *ngIf="winner">Winner: {{ winner }}</p>
+      <p *ngIf="!winner">Current Player: {{ currentPlayer }}</p>
+      <button (click)="resetGame()">Reset</button>
+      <button (click)="undoMove()">Undo</button>
+    </div>
+  </div>
+
+  <!-- Scoreboard -->
+  <!-- <h3>Scoreboard</h3>
+  <ul>
+    <li *ngFor="let s of scoreboard">
+      {{ s.player }} - Wins: {{ s.wins }} | Losses: {{ s.losses }} | Draws: {{ s.draws }}
+    </li>
+  </ul>
+  <button (click)="resetScoreboard()">Reset Scoreboard</button> -->
+</div>
