@@ -43,14 +43,14 @@ namespace API.Controllers
         public async Task<IActionResult> UndoMove(int id)
         {
             var success = await _gameService.UndoLastMoveAsync(id);
-            return success ? Ok("Last move undone") : NotFound();
+            return success ? Ok(success) : NotFound();
         }
 
         [HttpPost("{id}/reset")]
         public async Task<IActionResult> ResetGame(int id)
         {
             var success = await _gameService.ResetGameAsync(id);
-            return success ? Ok("Game reset") : NotFound();
+            return success ? Ok(success) : NotFound();
         }
     }
 

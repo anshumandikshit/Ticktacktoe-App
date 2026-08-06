@@ -11,6 +11,7 @@
     <div class="board">
       <div *ngFor="let cell of board; let i = index"
            class="cell"
+           [class.winning]="winningCells.includes(i)"
            (click)="makeMove(i)">
         {{ cell }}
       </div>
@@ -20,16 +21,27 @@
       <p *ngIf="winner">Winner: {{ winner }}</p>
       <p *ngIf="!winner">Current Player: {{ currentPlayer }}</p>
       <button (click)="resetGame()">Reset</button>
-      <button (click)="undoMove()">Undo</button>
+      <button (click)="undoMove()" [disabled]="!!winner">Undo</button>
     </div>
   </div>
 
-  <!-- Scoreboard -->
-  <!-- <h3>Scoreboard</h3>
-  <ul>
-    <li *ngFor="let s of scoreboard">
-      {{ s.player }} - Wins: {{ s.wins }} | Losses: {{ s.losses }} | Draws: {{ s.draws }}
-    </li>
-  </ul>
-  <button (click)="resetScoreboard()">Reset Scoreboard</button> -->
+  <div class="history" *ngIf="moveHistory.length > 0">
+  <h3>Move History</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Player</th>
+        <th>Position</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let move of moveHistory; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ move.player }}</td>
+        <td>{{ formatAction(move.action) }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 </div>
