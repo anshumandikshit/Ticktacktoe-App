@@ -4,7 +4,7 @@ namespace API.Services.Interface
 {
     public interface IScoreboardService
     {
-        Task<List<Scoreboard>> GetScoreboardAsync();
+        Task<Scoreboard> GetScoreboardAsync(Guid sessionId);
         Task ResetScoreboardAsync();
     }
 

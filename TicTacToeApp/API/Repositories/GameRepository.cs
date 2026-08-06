@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using API.Data;
+using API.Migrations;
 using API.Models;
 using API.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -15,8 +16,9 @@ namespace API.Repositories
             _context = context;
         }
 
-        public async Task<Game> AddGameAsync(Game game)
+        public async Task<Game> AddGameAsync(Guid sessionId, Game game)
         {
+            game.SessionId = sessionId;
             _context.Games.Add(game);
             await _context.SaveChangesAsync();
             return game;
@@ -60,17 +62,33 @@ namespace API.Repositories
                         board[row, col] = m.Player;
                     }
                 }
-
+                var scoreboard = await _context.Scoreboards
+                                        .FirstOrDefaultAsync(s => s.SessionId == game.SessionId);
+                if (scoreboard == null)
+                {
+                    scoreboard = new Scoreboard { SessionId = game.SessionId };
+                    _context.Scoreboards.Add(scoreboard);
+                }
                 // Update game status
                 if (HasWinner(board))
                 {
                     game.Status = "Completed";
                     game.CurrentTurn = move.Player; // winner
+                    //Call the ScoreboardRepo per Session
+                    
+                    
+                    switch (move.Player)
+                    {
+                        case "X": scoreboard.XWins++; break;
+                        case "O": scoreboard.OWins++; break;
+                    }
+
                 }
                 else if (game.Moves.Count == 9)
                 {
                     game.Status = "Completed";
                     game.CurrentTurn = "Draw";
+                    scoreboard.Draws++;
                 }
                 else
                 {

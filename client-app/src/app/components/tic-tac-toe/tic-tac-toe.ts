@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Game } from '../../models/Game';
 import { Move } from '../../models/Move';
 import { ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { ScoreBoard } from '../../models/ScoreBoard';
 
 @Component({
   selector: 'app-tic-tac-toe',
@@ -14,17 +15,19 @@ import { ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.Default 
 })
 export class TicTacToeComponent {
+
   isLoading: boolean = false;
   board: string[] = Array(9).fill('');
   currentPlayer: 'X' | 'O' = 'X';
   winner: string | null = null;
   gameId: number | null = null;
-  scoreboard: any[] = [];
+  scoreboard: ScoreBoard  | null = null;
   winningCells: number[] = []; //  track winning indices
   moveHistory: Move[] = [];
+  toggleScoreboard:boolean= false;
 
   constructor(private gameService: GameService, private cd: ChangeDetectorRef) { }
-
+  
   public startGame() {
     this.isLoading = true;
     const newGame: Game = {
@@ -34,16 +37,18 @@ export class TicTacToeComponent {
       status: 'Active',
       moves: []
     };
-
-    this.gameService.createGame(newGame).subscribe(game => {
+    let sessionId = localStorage.getItem('sessionId')??'';
+    this.gameService.createGame(sessionId,newGame).subscribe(game => {
       this.isLoading=false;
       this.gameId = game.id;
       this.board = [...Array(9).fill('')];
+      this.moveHistory=[];
       this.currentPlayer = 'X';
       this.winner = null;
       this.winningCells = [];
-      this.loadScoreboard();
       this.cd.detectChanges(); 
+      this.loadScoreboard();
+      
     });
   }
 
@@ -110,11 +115,18 @@ export class TicTacToeComponent {
     }
   }
 
+  public viewScoreBoard(){ 
+  this.toggleScoreboard= !this.toggleScoreboard;
+  if(this.toggleScoreboard){
+    this.loadScoreboard();
+  }
+}
   public loadScoreboard() {
-    this.isLoading=true
-    this.gameService.getScoreboard().subscribe(scores => {
+    this.isLoading=true;
+    let sessionId = localStorage.getItem('sessionId')??'';
+    this.gameService.getScoreboard(sessionId).subscribe(scores => {
       this.isLoading=false;
-      this.scoreboard = scores;
+      this.scoreboard = {...scores};
       this.cd.detectChanges(); 
     });
   }
@@ -123,7 +135,7 @@ export class TicTacToeComponent {
     this.isLoading=true;
     this.gameService.resetScoreboard().subscribe(() => {
       this.isLoading=false;
-      this.scoreboard = [];
+      this.scoreboard = null;
       this.cd.detectChanges(); 
     });
   }

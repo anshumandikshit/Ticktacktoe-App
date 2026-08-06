@@ -4,7 +4,7 @@ namespace API.Repositories.Interface
 {
     public interface IScoreboardRepository
     {
-        Task<List<Scoreboard>> GetScoreboardAsync();
+        Task<Scoreboard> GetScoreboardAsync(Guid sessionId);
         Task ResetScoreboardAsync();
         Task SaveChangesAsync();
     }

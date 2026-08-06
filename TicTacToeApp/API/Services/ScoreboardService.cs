@@ -13,9 +13,9 @@ namespace API.Services
             _repo = repo;
         }
 
-        public async Task<List<Scoreboard>> GetScoreboardAsync()
+        public async Task<Scoreboard> GetScoreboardAsync(Guid sessionId)
         {
-            return await _repo.GetScoreboardAsync();
+            return await _repo.GetScoreboardAsync(sessionId);
         }
 
         public async Task ResetScoreboardAsync()

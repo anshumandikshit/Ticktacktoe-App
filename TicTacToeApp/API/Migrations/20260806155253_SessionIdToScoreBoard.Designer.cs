@@ -4,6 +4,7 @@ using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(GameDbContext))]
-    partial class GameDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260806155253_SessionIdToScoreBoard")]
+    partial class SessionIdToScoreBoard
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -97,19 +100,20 @@ namespace API.Migrations
                     b.Property<int>("Draws")
                         .HasColumnType("int");
 
-                    b.Property<int>("OWins")
+                    b.Property<int>("Losses")
                         .HasColumnType("int");
+
+                    b.Property<string>("Player")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("SessionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("XWins")
+                    b.Property<int>("Wins")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SessionId")
-                        .IsUnique();
 
                     b.ToTable("Scoreboards");
                 });

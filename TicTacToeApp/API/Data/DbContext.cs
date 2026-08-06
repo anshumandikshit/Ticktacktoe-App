@@ -22,6 +22,10 @@ namespace API.Data
                 .HasIndex(m => new { m.GameId })
                 .HasDatabaseName("IX_Move_GameId")
                 .IsClustered(false); // ✅ explicitly non-clustered
+
+            modelBuilder.Entity<Scoreboard>()
+                    .HasIndex(s => s.SessionId)
+                    .IsUnique(); // ensures one scoreboard per session
         }
     }
 }

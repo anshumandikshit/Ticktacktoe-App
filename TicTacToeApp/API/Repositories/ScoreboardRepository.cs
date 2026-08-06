@@ -14,9 +14,9 @@ namespace API.Repositories
             _context = context;
         }
 
-        public async Task<List<Scoreboard>> GetScoreboardAsync()
+        public async Task<Scoreboard> GetScoreboardAsync(Guid sessionId)
         {
-            return await _context.Scoreboards.ToListAsync();
+            return await _context.Scoreboards.FirstAsync();
         }
 
         public async Task ResetScoreboardAsync()

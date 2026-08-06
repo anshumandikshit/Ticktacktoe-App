@@ -13,7 +13,7 @@ namespace API.Services
             _repo = repo;
         }
 
-        public async Task<Game> CreateGameAsync(Game game) => await _repo.AddGameAsync(game);
+        public async Task<Game> CreateGameAsync(Guid sessionId, Game game) => await _repo.AddGameAsync(sessionId, game);
 
         public async Task<Game?> GetGameAsync(int id) => await _repo.GetGameAsync(id);
 

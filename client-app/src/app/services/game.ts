@@ -12,9 +12,10 @@ export class GameService {
 
   constructor(private http: HttpClient) {}
 
+
   // Create new game
-  createGame(newGame : Game): Observable<any> {
-    return this.http.post(`${this.baseUrl}/games`, newGame);
+  createGame(sessionId : string,newGame : Game): Observable<any> {
+    return this.http.post(`${this.baseUrl}/games/${sessionId}`, newGame);
   }
 
   // Get game state
@@ -38,8 +39,8 @@ export class GameService {
   }
 
   // Scoreboard
-  getScoreboard(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/scoreboard`);
+  getScoreboard(sessionId : string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/scoreboard/${sessionId}`);
   }
 
   resetScoreboard(): Observable<any> {

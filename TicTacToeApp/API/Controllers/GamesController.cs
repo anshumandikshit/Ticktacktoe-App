@@ -17,10 +17,10 @@ namespace API.Controllers
             _gameService = gameService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateGame([FromBody] Game game)
+        [HttpPost("{sessionId}")]
+        public async Task<IActionResult> CreateGame(Guid sessionId, [FromBody] Game game)
         {
-            var created = await _gameService.CreateGameAsync(game);
+            var created = await _gameService.CreateGameAsync(sessionId,game);
             return Ok(created);
         }
 

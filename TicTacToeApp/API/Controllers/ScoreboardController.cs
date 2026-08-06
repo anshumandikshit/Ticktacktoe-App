@@ -16,10 +16,10 @@ namespace API.Controllers
             _scoreboardService = scoreboardService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetScoreboard()
+        [HttpGet("{sessionId}")]
+        public async Task<IActionResult> GetScoreboard(Guid sessionId)
         {
-            var scores = await _scoreboardService.GetScoreboardAsync();
+            var scores = await _scoreboardService.GetScoreboardAsync(sessionId);
             return Ok(scores);
         }
 
