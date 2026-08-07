@@ -3,7 +3,8 @@
 
   <!-- Start Button -->
   <div class="start-section" *ngIf="!gameId">
-    <button (click)="startGame()">Start Game (Player1(X) vs Player2(O))</button>
+    <button (click)="startGame('PvP')">Start Game (Player1(X) vs Player2(O))</button>
+    <button (click)="startGame('PvC')">Start Game (Player1(X) vs Computer(O))</button>
   </div>
 
   <!-- Game Board -->
@@ -23,7 +24,7 @@
       <div class="actionButton">
         <button (click)="resetGame()">Reset</button>
         <button (click)="undoMove()" [disabled]="!!winner">Undo</button>
-        <button (click)="startGame()" >New Game</button>
+        <button (click)="startGame(this.currentGameType!)" >New Game</button>
       </div>
       
     </div>

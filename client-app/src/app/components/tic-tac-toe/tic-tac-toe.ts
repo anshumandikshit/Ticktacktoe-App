@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { GameService } from '../../services/game';
 import { CommonModule } from '@angular/common';
-import { Game } from '../../models/Game';
+import { Game, GameType } from '../../models/Game';
 import { Move } from '../../models/Move';
 import { ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ScoreBoard } from '../../models/ScoreBoard';
@@ -21,6 +21,7 @@ export class TicTacToeComponent {
   currentPlayer: 'X' | 'O' = 'X';
   winner: string | null = null;
   gameId: number | null = null;
+  currentGameType : GameType | undefined ;
   scoreboard: ScoreBoard  | null = null;
   winningCells: number[] = []; //  track winning indices
   moveHistory: Move[] = [];
@@ -28,13 +29,14 @@ export class TicTacToeComponent {
 
   constructor(private gameService: GameService, private cd: ChangeDetectorRef) { }
   
-  public startGame() {
+  public startGame(gameType : GameType) {
     this.isLoading = true;
     const newGame: Game = {
       player1: 'X',
       player2: 'O',
       currentTurn: 'X',
       status: 'Active',
+      gameType:gameType,
       moves: []
     };
     let sessionId = localStorage.getItem('sessionId')??'';
@@ -44,6 +46,7 @@ export class TicTacToeComponent {
       this.board = [...Array(9).fill('')];
       this.moveHistory=[];
       this.currentPlayer = 'X';
+      this.currentGameType=gameType;
       this.winner = null;
       this.winningCells = [];
       this.cd.detectChanges(); 

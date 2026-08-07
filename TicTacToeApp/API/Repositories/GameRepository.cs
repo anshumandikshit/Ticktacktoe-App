@@ -4,6 +4,7 @@ using API.Migrations;
 using API.Models;
 using API.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
+using static API.Enums.ApplicationEnumscs;
 
 namespace API.Repositories
 {
@@ -19,7 +20,17 @@ namespace API.Repositories
         public async Task<Game> AddGameAsync(Guid sessionId, Game game)
         {
             game.SessionId = sessionId;
-            _context.Games.Add(game);
+            if(game.GameType== GameType.PvP.ToString())
+            {
+                game.Player1 = PlayerCategory.X.ToString();
+                game.Player2 = PlayerCategory.O.ToString();
+            }
+            else
+            {
+                game.Player1 = PlayerCategory.X.ToString();
+                game.Player2 = PlayerCategory.O.ToString();
+            }
+                _context.Games.Add(game);
             await _context.SaveChangesAsync();
             return game;
         }
@@ -32,74 +43,98 @@ namespace API.Repositories
         public async Task<Game> UpdateCurrentTurnGameAssync(Game game)
         {
             var gameContext = await _context.Games.Where(g => g.Id == game.Id).FirstOrDefaultAsync();
-            gameContext.CurrentTurn = game.CurrentTurn;
-
+            if (gameContext.GameType == GameType.PvC.ToString())
+            {
+                gameContext.CurrentTurn = PlayerCategory.X.ToString();
+            }
+            else
+            {
+                gameContext.CurrentTurn = game.CurrentTurn;
+            }
             await _context.SaveChangesAsync();
             return gameContext;
         }
 
         public async Task<Move> AddMoveAsync(Move move)
         {
-            _context.Moves.Add(move);
-            await _context.SaveChangesAsync();
-
-            // Load the game with all moves
             var game = await _context.Games
                 .Include(g => g.Moves)
                 .FirstOrDefaultAsync(g => g.Id == move.GameId);
 
-            if (game != null)
+            if (game == null) return move;
+
+            // Add human move
+            _context.Moves.Add(move);
+            await _context.SaveChangesAsync();
+            await _context.Entry(game).Collection(g => g.Moves).LoadAsync();
+
+            var board = BuildBoard(game.Moves);
+
+            // If PvC and human just played, let Computer respond
+            if (game.GameType == GameType.PvC.ToString()
+                && move.Player == "X"
+                && !HasWinner(board)
+                && game.Moves.Count < 9)
             {
-                // Build board
-                var board = new string[3, 3];
-                foreach (var m in game.Moves)
-                {
-                    var coords = Regex.Match(m.Action, @"\((\d+),(\d+)\)");
-                    if (coords.Success)
-                    {
-                        int row = int.Parse(coords.Groups[1].Value);
-                        int col = int.Parse(coords.Groups[2].Value);
-                        board[row, col] = m.Player;
-                    }
-                }
-                var scoreboard = await _context.Scoreboards
-                                        .FirstOrDefaultAsync(s => s.SessionId == game.SessionId);
-                if (scoreboard == null)
-                {
-                    scoreboard = new Scoreboard { SessionId = game.SessionId };
-                    _context.Scoreboards.Add(scoreboard);
-                }
-                // Update game status
-                if (HasWinner(board))
-                {
-                    game.Status = "Completed";
-                    game.CurrentTurn = move.Player; // winner
-                    //Call the ScoreboardRepo per Session
-                    
-                    
-                    switch (move.Player)
-                    {
-                        case "X": scoreboard.XWins++; break;
-                        case "O": scoreboard.OWins++; break;
-                    }
-
-                }
-                else if (game.Moves.Count == 9)
-                {
-                    game.Status = "Completed";
-                    game.CurrentTurn = "Draw";
-                    scoreboard.Draws++;
-                }
-                else
-                {
-                    game.Status = "Active";
-                    game.CurrentTurn = move.Player == "X" ? "O" : "X";
-                }
-
+                var computerMove = GenerateComputerMove(game, board);
+                _context.Moves.Add(computerMove);
                 await _context.SaveChangesAsync();
+
+                await _context.Entry(game).Collection(g => g.Moves).LoadAsync();
+                board = BuildBoard(game.Moves);
             }
+
+            var scoreboard = await _context.Scoreboards
+                .FirstOrDefaultAsync(s => s.SessionId == game.SessionId);
+
+            if (scoreboard == null)
+            {
+                scoreboard = new Scoreboard { SessionId = game.SessionId };
+                _context.Scoreboards.Add(scoreboard);
+            }
+
+            // Determine winner based on board
+            if (HasWinner(board))
+            {
+                game.Status = "Completed";
+
+                // Find last move (winner)
+                var lastMove = game.Moves.OrderByDescending(m => m.Timestamp).First();
+                var winner = lastMove.Player;
+                game.CurrentTurn = winner; // store winner
+
+                switch (winner)
+                {
+                    case "X":
+                        scoreboard.XWins++;
+                        break;
+                    case "O":
+                        if (game.GameType == GameType.PvC.ToString())
+                            scoreboard.OWins++;
+                        else
+                            scoreboard.OWins++;
+                        break;
+                }
+            }
+            else if (game.Moves.Count == 9)
+            {
+                game.Status = "Completed";
+                game.CurrentTurn = "Draw";
+                scoreboard.Draws++;
+            }
+            else
+            {
+                game.Status = "Active";
+
+                // Next turn should be based on last move
+                var lastMove = game.Moves.OrderByDescending(m => m.Timestamp).First();
+                game.CurrentTurn = lastMove.Player == "X" ? "O" : "X";
+            }
+
+            await _context.SaveChangesAsync();
             return move;
         }
+
 
 
         public async Task<Move?> GetLastMoveAsync(int gameId)
@@ -140,6 +175,45 @@ namespace API.Repositories
                 return true;
 
             return false;
+        }
+
+
+        private string[,] BuildBoard(IEnumerable<Move> moves)
+        {
+            var board = new string[3, 3];
+            foreach (var m in moves)
+            {
+                var coords = Regex.Match(m.Action, @"\((\d+),(\d+)\)");
+                if (coords.Success)
+                {
+                    int row = int.Parse(coords.Groups[1].Value);
+                    int col = int.Parse(coords.Groups[2].Value);
+                    board[row, col] = m.Player;
+                }
+            }
+            return board;
+        }
+
+        private Move GenerateComputerMove(Game game, string[,] board)
+        {
+            // Simple strategy: first empty cell
+            for (int row = 0; row < 3; row++)
+            {
+                for (int col = 0; col < 3; col++)
+                {
+                    if (string.IsNullOrEmpty(board[row, col]))
+                    {
+                        return new Move
+                        {
+                            GameId = game.Id,
+                            Player = "O",
+                            Action = $"O at ({row},{col})",
+                            Timestamp = DateTime.UtcNow
+                        };
+                    }
+                }
+            }
+            throw new InvalidOperationException("No empty cells left");
         }
     }
 
