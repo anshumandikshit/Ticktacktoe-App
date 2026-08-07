@@ -1,0 +1,19 @@
+<div class="history" *ngIf="moveHistory.length > 0">
+  <h3>Move History</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>S.L</th>
+        <th>Player</th>
+        <th>Position</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let move of moveHistory; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ move.player }}</td>
+        <td>{{ formatAction(move.action) }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

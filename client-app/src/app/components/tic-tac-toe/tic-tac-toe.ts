@@ -6,13 +6,14 @@ import { Move } from '../../models/Move';
 import { ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ScoreBoard } from '../../models/ScoreBoard';
 import { ScoreboardSignalRService } from '../../services/ScoreBoardSignal.service';
+import { MoveHistoryComponent } from '../move-history/move-history';
 
 @Component({
   selector: 'app-tic-tac-toe',
   standalone: true,
   templateUrl: './tic-tac-toe.html',
   styleUrls: ['./tic-tac-toe.scss'],
-  imports: [CommonModule],
+  imports: [CommonModule,MoveHistoryComponent],
   changeDetection: ChangeDetectionStrategy.Default 
 })
 export class TicTacToeComponent {
