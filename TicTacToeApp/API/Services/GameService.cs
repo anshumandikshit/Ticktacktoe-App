@@ -1,6 +1,8 @@
-﻿using API.Models;
+﻿using API.Migrations;
+using API.Models;
 using API.Repositories.Interface;
 using API.Services.Interface;
+using static API.Enums.ApplicationEnumscs;
 
 namespace API.Services
 {
@@ -32,6 +34,12 @@ namespace API.Services
             if (game == null) return false;
             game.CurrentTurn = lastMove.Player;
             await _repo.RemoveMoveAsync(lastMove);
+            if (game.GameType == GameType.PvC.ToString())
+            {
+                lastMove = await _repo.GetLastMoveAsync(gameId);
+                await _repo.RemoveMoveAsync(lastMove);
+
+            }
             await _repo.UpdateCurrentTurnGameAssync(game);
             return true;
         }
