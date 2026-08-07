@@ -5,6 +5,7 @@ import { Game, GameType } from '../../models/Game';
 import { Move } from '../../models/Move';
 import { ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ScoreBoard } from '../../models/ScoreBoard';
+import { ScoreboardSignalRService } from '../../services/ScoreBoardSignal.service';
 
 @Component({
   selector: 'app-tic-tac-toe',
@@ -27,7 +28,15 @@ export class TicTacToeComponent {
   moveHistory: Move[] = [];
   toggleScoreboard:boolean= false;
 
-  constructor(private gameService: GameService, private cd: ChangeDetectorRef) { }
+  constructor(private gameService: GameService, private cd: ChangeDetectorRef,private signalRService: ScoreboardSignalRService) { }
+  
+  ngOnInit() {
+    
+      this.signalRService.startConnection((updatedScoreboard) => {
+      this.scoreboard = updatedScoreboard;
+    });
+  }
+
   
   public startGame(gameType : GameType) {
     this.isLoading = true;

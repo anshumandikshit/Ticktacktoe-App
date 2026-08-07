@@ -3,6 +3,8 @@ using API.Data;
 using API.Migrations;
 using API.Models;
 using API.Repositories.Interface;
+using API.WebSocket;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using static API.Enums.ApplicationEnumscs;
 
@@ -11,10 +13,12 @@ namespace API.Repositories
     public class GameRepository : IGameRepository
     {
         private readonly GameDbContext _context;
+        private readonly IHubContext<ScoreboardHub> _hubContext;
 
-        public GameRepository(GameDbContext context)
+        public GameRepository(GameDbContext context, IHubContext<ScoreboardHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         public async Task<Game> AddGameAsync(Guid sessionId, Game game)
@@ -132,6 +136,7 @@ namespace API.Repositories
             }
 
             await _context.SaveChangesAsync();
+            await NotifyScoreboardUpdate(game.SessionId, scoreboard);
             return move;
         }
 
@@ -214,6 +219,11 @@ namespace API.Repositories
                 }
             }
             throw new InvalidOperationException("No empty cells left");
+        }
+
+        private async Task NotifyScoreboardUpdate(Guid sessionId, Scoreboard scoreboard)
+        {
+            await _hubContext.Clients.All.SendAsync("ScoreboardUpdated", scoreboard);
         }
     }
 

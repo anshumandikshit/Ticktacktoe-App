@@ -5,6 +5,7 @@ using API.Repositories;
 using API.Services.Interface;
 using API.Services;
 using Microsoft.EntityFrameworkCore;
+using API.WebSocket;
 
 namespace API
 {
@@ -21,7 +22,7 @@ namespace API
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
+            builder.Services.AddSignalR();
 
             builder.Services.AddScoped<IGameRepository, GameRepository>();
             builder.Services.AddScoped<IScoreboardRepository, ScoreboardRepository>();
@@ -33,16 +34,18 @@ namespace API
                 options.AddPolicy("AllowAll",
                     policy =>
                     {
-                        policy.AllowAnyOrigin()
+                        policy.WithOrigins("http://localhost:4200")
                               .AllowAnyHeader()
-                              .AllowAnyMethod();
+                              .AllowAnyMethod()
+                              .AllowCredentials();
                     });
             });
 
             var app = builder.Build();
 
-
+            
             app.UseCors("AllowAll");
+            app.MapHub<ScoreboardHub>("/scoreboardHub");
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
