@@ -195,13 +195,13 @@ uuid: ^14.0.1
 3. .NET Backend Server is running on (https://localhost:7199)
 4. SignalR server is running on (https://localhost:7199/scoreboardHub)
 
-## 🧪 Testing
 
-This project uses **Vitest** for testing.
 
-```bash
-npm run test
-```
+### Database Setup 
+1. Install SQL server and Connect to the Connection String Mentioned in the AppSettings(Note : This is a Sample Localhost Appsettings)
+2. move to the Root Directory of the API (Ticktacktoe-App\TicTacToeApp\API)
+3. Run Migration Scripts
+    `dotnet ef database update `
 
 ## 👥 Contributors
 
